@@ -3,16 +3,57 @@
 # Standard library imports
 
 # Remote library imports
-from flask import request, session
+from flask import request, session, make_response
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
 
 # Local imports
 from config import app, db, api
-from models import User
+from models import User, Song, CreatedSong, LikedSong
 
 
 # Views go here!
+class Users(Resource):
+    def get(self):
+        user_dicts = [user.to_dict() for user in User.query.all()]
+
+        return make_response(
+            user_dicts,
+            200
+        )
+    
+class UserById(Resource):
+    def get(self, id):
+        user = User.query.filter(User.id == id).first()
+
+        if not user:
+            return make_response({ 'error': 'User not found!' }, 404)
+        
+        return make_response(
+            user.to_dict(),
+            200
+        )
+    
+class Songs(Resource):
+    def get(self):
+        song_dicts = [song.to_dict() for song in Song.query.all()]
+
+        return make_response(
+            song_dicts,
+            200
+        )
+    
+class SongById(Resource):
+    def get(self, id):
+        song = Song.query.filter(Song.id == id).first()
+
+        if not song:
+            return make_response({ 'error': 'User not found!' }, 404)
+        
+        return make_response(
+            song.to_dict(),
+            200
+        )
 
 
 class Signup(Resource):
@@ -21,23 +62,15 @@ class Signup(Resource):
 
         username = request_json.get('username')
         password = request_json.get('password')
-        image_url = request_json.get('image_url')
-        bio = request_json.get('bio')
 
         user = User(
             username=username,
-            image_url=image_url,
-            bio=bio
         )
 
         # the setter will encrypt this
         user.password_hash = password
 
-        print('first')
-
         try:
-            print('here!')
-
             db.session.add(user)
             db.session.commit()
 
@@ -48,8 +81,6 @@ class Signup(Resource):
             return user.to_dict(), 201
 
         except IntegrityError:
-            print('no, here!')
-        
             return {'error': '422 Unprocessable Entity'}, 422
 
 class CheckSession(Resource):
@@ -67,7 +98,6 @@ class CheckSession(Resource):
 class Login(Resource):
     
     def post(self):
-
         request_json = request.get_json()
 
         username = request_json.get('username')
@@ -94,6 +124,11 @@ class Logout(Resource):
         
         return {'error': '401 Unauthorized'}, 401
     
+
+api.add_resource(Users, '/users')
+api.add_resource(UserById, '/users/<int:id>')
+api.add_resource(Songs, '/songs')
+api.add_resource(SongById, '/songs/<int:id>')
 api.add_resource(Signup, '/signup', endpoint='signup')
 api.add_resource(CheckSession, '/check_session', endpoint='check_session')
 api.add_resource(Login, '/login', endpoint='login')
