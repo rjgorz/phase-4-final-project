@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 
 # Standard library imports
-
+import os
 # Remote library imports
-from flask import request, session, make_response
+from flask import request, session, make_response, flash, redirect, url_for
 from flask_restful import Resource
 from sqlalchemy.exc import IntegrityError
+from werkzeug.utils import secure_filename
+
 
 # Local imports
 from config import app, db, api
 from models import User, Song, CreatedSong, LikedSong
 
+UPLOAD_FOLDER = '/static'
+ALLOWED_EXTENSIONS = {'mp3'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Views go here!
 class Users(Resource):
@@ -42,6 +52,14 @@ class Songs(Resource):
             song_dicts,
             200
         )
+    
+    def post(self):
+        new_song = Song(
+            title=request.get_json()['title'],
+            likes=0,
+            genre=request.get_json()['genre'],
+        )
+
     
 class SongById(Resource):
     def get(self, id):

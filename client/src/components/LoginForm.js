@@ -47,10 +47,7 @@ function LoginForm({ onLogin }) {
         <button type="submit">
           {isLoading ? "Loading..." : "Login"}
         </button>
-        {errors.map((err) => (<Wrapper>
-          <Alert>!</Alert>
-          <Message>{err}</Message></Wrapper>
-        ))}
+        {errors.map((err) => (<p>{err}</p>))}
     </form>
   );
 }

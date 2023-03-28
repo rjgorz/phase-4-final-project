@@ -22,11 +22,8 @@ function App() {
       <Nav user={user} setUser={setUser} />
       <main>
         <Switch>
-          <Route path="/new">
-            <NewRecipe user={user} />
-          </Route>
           <Route path="/">
-            <RecipeList />
+            <h1>Test</h1>
           </Route>
         </Switch>
       </main>
