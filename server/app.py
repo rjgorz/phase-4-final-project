@@ -13,14 +13,8 @@ from werkzeug.utils import secure_filename
 from config import app, db, api
 from models import User, Song, CreatedSong, LikedSong
 
-UPLOAD_FOLDER = '/static'
-ALLOWED_EXTENSIONS = {'mp3'}
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+app.config['ALLOWED_EXTENSIONS'] = ['mp3']
+app.config['UPLOAD_FOLDER'] = 'static/'
 
 # Views go here!
 class Users(Resource):
@@ -54,11 +48,23 @@ class Songs(Resource):
         )
     
     def post(self):
+        file = request.files['file']
+        extension = os.path.splitext(file.filename)[1]
+
         new_song = Song(
             title=request.get_json()['title'],
             likes=0,
             genre=request.get_json()['genre'],
+            mp3=file
         )
+
+        if file:
+            if extension not in app.config['ALLOWED_EXTENSIONS']:
+                return 'File is not an mp3.'
+            file.save(os.path.join(
+                app.config['UPLOAD_FOLDER'],
+                secure_filename(file.filename)
+            ))
 
     
 class SongById(Resource):

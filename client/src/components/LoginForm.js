@@ -47,7 +47,7 @@ function LoginForm({ onLogin }) {
         <button type="submit">
           {isLoading ? "Loading..." : "Login"}
         </button>
-        {errors.map((err) => (<p>{err}</p>))}
+        {errors}
     </form>
   );
 }
