@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 from config import app, db, api
 from models import User, Song, CreatedSong, LikedSong
 
-app.config['ALLOWED_EXTENSIONS'] = ['mp3']
+app.config['ALLOWED_EXTENSIONS'] = {'mp3'}
 app.config['UPLOAD_FOLDER'] = 'static/'
 
 # Views go here!
@@ -49,22 +49,35 @@ class Songs(Resource):
     
     def post(self):
         file = request.files['file']
-        extension = os.path.splitext(file.filename)[1]
-
+        # extension = os.path.splitext(file.filename)[1]
+        # import pdb; pdb.set_trace()
+        print(file)
         new_song = Song(
             title=request.get_json()['title'],
             likes=0,
             genre=request.get_json()['genre'],
-            mp3=file
+            # mp3=os.path.join(
+            #     app.config['UPLOAD_FOLDER'],
+            #     secure_filename(file.filename)
+            # )
         )
-
+        
+        print(new_song)
         if file:
-            if extension not in app.config['ALLOWED_EXTENSIONS']:
-                return 'File is not an mp3.'
+            # if extension not in app.config['ALLOWED_EXTENSIONS']:
+            #     return 'File is not an mp3.'
             file.save(os.path.join(
                 app.config['UPLOAD_FOLDER'],
                 secure_filename(file.filename)
             ))
+
+        db.session.add(new_song)
+        db.session.commit()
+
+        return make_response(
+            new_song.to_dict(),
+            201
+        )
 
     
 class SongById(Resource):
@@ -72,7 +85,7 @@ class SongById(Resource):
         song = Song.query.filter(Song.id == id).first()
 
         if not song:
-            return make_response({ 'error': 'User not found!' }, 404)
+            return make_response({ 'error': 'Song not found!' }, 404)
         
         return make_response(
             song.to_dict(),

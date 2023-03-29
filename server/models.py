@@ -43,7 +43,7 @@ class Song(db.Model, SerializerMixin):
     title = db.Column(db.String, nullable=False)
     likes = db.Column(db.Integer, nullable=False)
     genre = db.Column(db.String, nullable=False)
-    mp3 = db.Column(db.String, nullable=False)
+    mp3 = db.Column(db.String)
 
     created_songs = db.relationship('CreatedSong', backref='song')
     liked_songs = db.relationship('LikedSong', backref='song')
